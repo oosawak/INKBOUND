@@ -5,14 +5,14 @@
 </style></head><body>
 <div id="hud"><div class="top"><div class="card"><div class="label">VITAL SIGNS</div><div class="value">HP <span id="hp">100</span></div><div id="health"></div></div><div id="stats" class="card"><div><div class="label">SCORE</div><div id="score" class="value">0000</div></div><div><div class="label">WAVE</div><div id="wave" class="value">01</div></div></div></div><div id="notice"></div><div id="crosshair">+</div><div id="hit">×</div><div id="status">WASD 移動 · SPACE ジャンプ<br>SHIFT 疾走 / 空中ダッシュ · CTRL スライド<br>E 長押し グラップル · R リロード · ESC ポーズ</div><div id="ammo" class="card"><div class="label" id="weaponLabel">INK RIFLE / AUTO</div><div class="value" id="rounds">30 / ∞</div><div id="ability" class="label">AIR DASH READY</div></div></div><div id="damage"></div>
 <div id="menu"><div class="sheet"><div class="label">FIELD NOTES / No. 001</div><h1>INKBOUND<br><span>ROOFTOP RUN</span></h1><p id="intro">青インクの街を駆け抜け、追跡ドローンを撃ち落とせ。<br>WaveをクリアするとHPが25回復します。</p><div class="controls"><span><kbd>W A S D</kbd> 移動</span><span><kbd>MOUSE</kbd> 視点 / 左クリック射撃</span><span><kbd>SPACE</kbd> ジャンプ</span><span><kbd>SHIFT</kbd> 地上スプリント</span><span><kbd>CTRL</kbd> 地上スライド</span><span><kbd>SHIFT</kbd> 空中ダッシュ（着地で補充）</span><span><kbd>E 長押し</kbd> 建物へグラップル</span><span><kbd>R</kbd> リロード / 弾薬無制限</span></div><button id="play" disabled>LOADING…</button><p id="message">Three.jsを読み込んでいます…</p><div id="footer">PC + キーボード・マウス / ESCで一時停止</div></div></div>
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js" onerror="document.getElementById('message').textContent='Three.jsを取得できません。インターネット接続を確認して再読み込みしてください。'"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/examples/js/loaders/GLTFLoader.js"></script>
-<script>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js';
 'use strict';
 if(typeof THREE!=='undefined') { try { boot(); } catch(error) { document.getElementById('message').textContent='起動できません: '+error.message; console.error(error); } }
 function boot(){
 const $=id=>document.getElementById(id),BLUE=0x194d9b,PAPER=0xf7f3e7;
-const cityLoader=new THREE.GLTFLoader();
+const cityLoader=new GLTFLoader();
 async function loadCompressedCity(){
   try{
     const parts=await Promise.all([
