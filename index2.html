@@ -13,7 +13,7 @@ import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.1/examples/
 if(typeof THREE!=='undefined') { try { boot(); } catch(error) { document.getElementById('message').textContent='起動できません: '+error.message; console.error(error); } }
 function boot(){
 const $=id=>document.getElementById(id),BLUE=0x194d9b,PAPER=0xf7f3e7;
-const cityLoader=new GLTFLoader();
+const cityLoader=new GLTFLoader();let cityRoot=null;
 async function loadCompressedCity(){
   try{
     const parts=await Promise.all([
@@ -24,7 +24,7 @@ async function loadCompressedCity(){
     joined.set(new Uint8Array(parts[0]),0); joined.set(new Uint8Array(parts[1]),parts[0].byteLength);
     const stream=new Blob([joined]).stream().pipeThrough(new DecompressionStream('gzip'));
     const data=await new Response(stream).arrayBuffer();
-    cityLoader.parse(data,'',g=>scene.add(g.scene),e=>console.error(e));
+    cityLoader.parse(data,'',g=>{cityRoot=g.scene;scene.add(cityRoot);surfaces.forEach(m=>m.visible=false);grid.visible=false;},e=>console.error(e));
   }catch(e){console.error('City map load failed',e);}
 }
 const scene=new THREE.Scene();loadCompressedCity();scene.background=new THREE.Color(PAPER);scene.fog=new THREE.Fog(PAPER,45,110);
@@ -65,7 +65,7 @@ if(e.code==='Space'&&p.ground){p.vel.y=9;p.ground=false;}
 if(e.code==='KeyR')reload();
 if(e.code.startsWith('Shift')&&!p.ground&&p.air){p.air=false;p.dash=.18;direction();if(wish.lengthSq()<.1)wish.copy(forward);p.vel.x=wish.x*25;p.vel.z=wish.z*25;}
 if(e.code.startsWith('Control')&&p.ground&&Math.hypot(p.vel.x,p.vel.z)>3){p.slide=.7;direction();if(wish.lengthSq()<.1)wish.copy(forward);p.vel.x=wish.x*18;p.vel.z=wish.z*18;}
-if(e.code==='KeyE'){aim();ray.setFromCamera(new THREE.Vector2(),camera);ray.far=42;const hit=ray.intersectObjects(surfaces,false)[0];if(hit&&hit.point.y>.3){p.grapple=hit.point.clone().addScaledVector(hit.face.normal,.7);p.grapple.y+=1; p.ground=false;}else message('建物を狙って E / 射程42m');}});
+if(e.code==='KeyE'){aim();ray.setFromCamera(new THREE.Vector2(),camera);ray.far=42;const targets=cityRoot?[...surfaces,cityRoot]:surfaces;const hit=ray.intersectObjects(targets,true)[0];if(hit&&hit.point.y>.3){p.grapple=hit.point.clone().addScaledVector(hit.face.normal,.7);p.grapple.y+=1; p.ground=false;}else message('建物を狙って E / 射程42m');}});
 document.addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyE')p.grapple=null;});
 document.addEventListener('mousedown',e=>{if(locked&&e.button===0)fire=true;});document.addEventListener('mouseup',e=>{if(e.button===0)fire=false;});document.addEventListener('contextmenu',e=>{if(locked)e.preventDefault();});
 function direction(){forward.set(-Math.sin(yaw),0,-Math.cos(yaw));right.set(Math.cos(yaw),0,-Math.sin(yaw));wish.set(0,0,0).addScaledVector(forward,(keys.KeyW?1:0)-(keys.KeyS?1:0)).addScaledVector(right,(keys.KeyD?1:0)-(keys.KeyA?1:0));if(wish.lengthSq())wish.normalize();}
